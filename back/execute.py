@@ -1,0 +1,50 @@
+#execute.py
+
+import curl_API as cl
+import json 
+
+begin = 25
+
+def add_relationship(user_id1, user_id2, info):
+  resultjs = cl.invoke('addAsset',
+              '''["{}&#@{}&#@{}","test","to record","ZIG","1","lover_test"]'''.format(user_id1,user_id2,info),
+              '''97adf9eabe6b698a27371b64c9dc2c65ec275952''')
+  result = json.loads(resultjs)
+  if result["success"] == False:
+    print("add fail")
+  else:
+    print("add success")
+
+def search_relationship(user_id):
+  d = {"haved":{},"lost":{}}
+  global begin
+  resultjs = cl.blocks()
+  result = json.loads(resultjs)
+  for block in result:
+    if block["id"]<begin:
+      continue
+
+    if block["transactions"][0]["args"][0] == "addAsset":
+      when =  block["transactions"][0]["timestamp"]
+      who1,who2,why = block["transactions"][0]["args"][1].split('&#@') 
+      if who1 == user_id:
+        who = who2
+      else:
+        who = who1
+      d["haved"][block["id"]] = {"when":when,"who":who,"why":why}
+
+    if block["transactions"][0]["args"][0] == "deleteAsset":
+      when = block["transactions"][0]["timestamp"]
+      who1,who2,why = block["transactions"][0]["args"][1].split('&#@') 
+      if who1 == user_id:
+        who = who2
+      else:
+        who = who1
+      d["lost"][block["id"]] = {"when":when,"who":who,"why":why}
+  
+  with open("out.json","w") as fp:
+    json.dump(d,fp, ensure_ascii=False ,indent=2)
+
+
+search_relationship('hqy')
+# add_relationship('hqy','yjn','fall in love')
