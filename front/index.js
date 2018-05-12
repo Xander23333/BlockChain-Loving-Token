@@ -41,7 +41,6 @@ app.post('/search', function (req, res) {
         result = JSON.parse(result);
         var ID = result.results[0].user_id;
         var name1 = ID2Name(ID);
-        console.log(name1);
 
         exec('python3 witharg.py sch ' + ID + ' ', function (error, stdout, stderr) {
             console.log(stdout);
@@ -73,17 +72,20 @@ app.post('/insert', function (req, res) {
         console.log(resultList);
         //TODO:所有id都拿到了
 
-        exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+        exec('python3 witharg.py add ' + resultList[0] + ' '  + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+            console.log(error);
             console.log(stdout);
+            console.log(stderr);
             res.end(stdout);
         });
+
     }).catch(err => {
         console.log('face api error: ' + err);
         Promise.all([addIntoSet(img1, name1), addIntoSet(img2, name2)]).then(resultList => {//分别获取到两个人user_id且都添加到set内
             console.log(resultList);
             //TODO:to chain
             //var exec = require('child_process').exec;
-            exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+            exec('python3 witharg.py add ' + resultList[0] + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
                 console.log(stdout);
                 res.end(stdout);
             });
