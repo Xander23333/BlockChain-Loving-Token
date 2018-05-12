@@ -17,17 +17,17 @@ if(args_h[1]=="add"):
     userid2=args_h[3]
     infom=args_h[4]
     ex.add_relationship(userid1,userid2,infom)
-    print("executed add function")
+    # print("executed add function")
 elif(args_h[1]=="del"):
     userid1=args_h[2]
     userid2=args_h[3]
     infom=args_h[4]
     ex.del_relationship(userid1,userid2,infom)
-    print("executed delete function")
+    # print("executed delete function")
 elif(args_h[1]=="sch"):
     usrid=args_h[2]
     ex.search_relationship(usrid)  
-    print("executed search function")
+    # print("executed search function")
 elif(args_h[1]=="blk"):
     ex.cl.blocks()
 else:
