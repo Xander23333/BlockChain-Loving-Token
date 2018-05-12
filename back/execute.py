@@ -24,6 +24,8 @@ def search_relationship(user_id):
   d = {"haved":{},"lost":{}}
   global begin
   resultjs = cl.blocks()
+  with open("log.json","w") as fp:
+    fp.write(resultjs)
   result = json.loads(resultjs)
   for block in result:
     if block["id"]<begin:
@@ -35,7 +37,10 @@ def search_relationship(user_id):
       if who1 == user_id:
         who = who2
       else:
-        who = who1
+        if who2 == user_id:
+          who = who1
+        else:
+          continue
       d["haved"][block["id"]] = {"when":when,"who":who,"why":why}
 
     if block["transactions"][0]["args"][0] == "deleteAsset":
@@ -44,12 +49,15 @@ def search_relationship(user_id):
       if who1 == user_id:
         who = who2
       else:
-        who = who1
+        if who2 == user_id:
+          who = who1
+        else:
+          continue
       d["lost"][block["id"]] = {"when":when,"who":who,"why":why}
   
   with open("out.json","w") as fp:
     json.dump(d,fp, ensure_ascii=False ,indent=2)
 
-add_relationship('hqy','yjn','fall in love')
-del_relationship('hqy','yjn','fall in love')
-search_relationship('hqy')
+add_relationship('hqy1','yjn1','fall in love')
+# del_relationship('hqy','yjn','fall in love')
+# search_relationship('hqy')
