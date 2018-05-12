@@ -29,7 +29,7 @@ from datetime import datetime
 from datetime import timedelta
 
 def search_relationship(user_id):
-  d = {"haved":{},"lost":{}}
+  d = []
   global begin
   resultjs = cl.blocks()
   result = json.loads(resultjs)
@@ -40,9 +40,9 @@ def search_relationship(user_id):
 
     transactions = block["transactions"][0]
     if transactions["args"][0] == "addAsset":
-      branch = 'haved'
+      branch = 'add'
     elif transactions["args"][0] == "deleteAsset":
-      branch = 'lost'
+      branch = 'del'
     else:
       continue
 
@@ -58,6 +58,9 @@ def search_relationship(user_id):
     else:
       continue
 
-    d["haved"][block["id"]] = {"when":when,"who":who,"why":why}
+    d.append( {"id":block["id"],"when":when,"who":who,"why":why,"type":branch} )
 
+  d = sorted(d,key = lambda x:x["id"])
   print(json.dumps(d, ensure_ascii=False ,indent=2))
+
+search_relationship('hanqiaoyue')

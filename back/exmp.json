@@ -1,36 +1,30 @@
-{
-  "haved": {
-    "32": {
-      "when": "2018-05-12T13:09:50.000Z",
-      "who": "yjn",
-      "why": "fall in love"
-    },
-    "28": {
-      "when": "2018-05-12T12:41:15.000Z",
-      "who": "yjn",
-      "why": "fall in love"
-    },
-    "26": {
+[
+    {
+      "id":26,
       "when": "2018-05-12T12:00:30.000Z",
       "who": "yjn",
-      "why": "fall in love"
+      "why": "fall in love",
+      "type":"add"
     },
-    "25": {
-      "when": "2018-05-12T12:00:27.000Z",
+    {
+      "id":30,
+      "when": "2018-05-12T12:00:30.000Z",
       "who": "yjn",
-      "why": "fall in love"
-    }
-  },
-  "lost": {
-    "31": {
-      "when": "2018-05-12T13:00:24.000Z",
-      "who": "yjn",
-      "why": "fall in love"
+      "why": "fall in love",
+      "type":"add"
     },
-    "27": {
-      "when": "2018-05-12T12:41:13.000Z",
+    {
+      "id":40,
+      "when": "2018-05-12T12:00:30.000Z",
       "who": "yjn",
-      "why": "fall in love"
+      "why": "fall in love",
+      "type":"del"
+    },
+    {
+      "id":50,
+      "when": "2018-05-12T12:00:30.000Z",
+      "who": "yjn",
+      "why": "fall in love",
+      "type":"add"
     }
-  }
-}
+]
