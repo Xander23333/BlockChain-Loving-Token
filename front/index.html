@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Face++</title>
+    <!-- import Vue.js -->
+    <script src="//vuejs.org/js/vue.min.js"></script>
+    <!-- import stylesheet -->
+    <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
+    <!-- import iView -->
+    <script src="//unpkg.com/iview/dist/iview.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="bg.js"></script>
+    <script>
+        window.onload = function(){
+            //配置
+            var config = {
+                vx: 4,//点x轴速度,正为右，负为左
+                vy:  4,//点y轴速度
+                height: 2,//点高宽，其实为正方形，所以不宜太大
+                width: 2,
+                count: 100,//点个数
+                color: "121, 162, 185",//点颜色
+                stroke: "21,139,184",//线条颜色
+                dist: 6000,//点吸附距离
+                e_dist: 20000,//鼠标吸附加速距离
+                max_conn: 10//点到点最大连接数
+            }
+            //调用
+            CanvasParticle(config);
+        }
+    </script>
+    <style>
+        #canvas {
+            border: dashed 2px blue;
+        }
+
+        #canvas2 {
+            border: dashed 2px blue;
+        }
+
+        header{
+            width: 100%;
+            height: 40px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            margin-bottom: 2rem;
+        }
+        header > p{
+            line-height: 40px;
+            font-weight: 500;
+            font-size: 20px;
+            box-shadow: 0 0 2px grey;
+            padding-left: 5px;
+            z-index: 100000;
+        }
+
+        .title{
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .desription{
+            font-weight: 500;
+        }
+        .time{
+            color: #333333;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <input id="upload" type="file" accept="image/*;" capture="camera"> -->
+    <header>
+        <p>Blockchain - Loving Token</p>
+    </header>
+    <div id="app">
+        <Row type="flex" justify="center" class="code-row-bg">
+            <i-col span="8">
+                <canvas id="canvas" width="600" height="480"></canvas>
+            </i-col>
+            <i-col span="8">
+                <video id="video" width="640" height="480" autoplay></video>
+            </i-col>
+            <i-col span="8" v-if="func == 'insert'">
+                <canvas id="canvas2" width="600" height="480"></canvas>
+            </i-col>
+        </Row>
+
+        <Row type="flex" justify="center" class="code-row-bg">
+            <i-col span="4">
+                <i-select v-model="func" style="width:200px">
+                    <i-option :value="'search'">查询</i-option>
+                    <i-option :value="'insert'">录入</i-option>
+                </i-select>
+                <i-button type="primary" @click="snap">拍照</i-button>
+                <i-input v-model="rel" placeholder="输入关系.." style="width: 300px" v-if="func == 'insert'"></i-input>
+                <i-input v-model="name1" placeholder="name1" style="width: 300px" v-if="func == 'insert'"></i-input>
+                <i-input v-model="name2" placeholder="name2" style="width: 300px" v-if="func == 'insert'"></i-input>
+            </i-col>
+        </Row>
+
+        <Row type="flex" justify="center" class="code-row-bg">
+            <i-col span="4">
+                <time-line v-for="item in timeLine_result" :key="item.who" style="margin-top: 20px;">
+                    <timeline-item>
+                        <p class="title">{{item.who}}</p>
+                        <p class="desription">{{item.why}}</p>
+                        <p class="time">{{item.when}}</p>
+                    </timeline-item>
+                </time-line>
+            </i-col>
+        </Row>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            mounted: function () {
+                window.addEventListener("DOMContentLoaded", function () {
+                    // Grab elements, create settings, etc.
+                    var video = document.getElementById('video');
+
+                    // Get access to the camera!
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        // Not adding `{ audio: true }` since we only want video now
+                        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+                            video.src = window.URL.createObjectURL(stream);
+                            video.play();
+                        });
+                    }
+                });
+                this.$Loading.config({height:40});
+            },
+            data: {
+                visible: false,
+                func: 'search',
+                rel:'',
+                name1:'',
+                name2:'',
+                canvas1: false,
+                canvas2: false,
+                sended:false,
+                timeLine_result:[]
+            },
+            methods: {
+                snap: function () {
+                    var that = this;
+                    if (!this.canvas1) {
+                        var canvas = document.getElementById('canvas');
+                        var context = canvas.getContext('2d');
+                        var video = document.getElementById('video');
+
+                        context.drawImage(video, 0, 0, 640, 480);
+                        this.canvas1 = true;
+
+                        if (this.canvas1 && this.func == 'search') {
+                            console.log("post");
+                            var canvas = document.getElementById('canvas');
+                            let dataurl = canvas.toDataURL();
+                            var data = dataurl.substring(22, dataurl.length);
+                            that.$Loading.start();
+
+                            var formData = new FormData();
+                            formData.append("smfile",that.convertBase64UrlToBlob(dataurl));
+                            $.ajax({
+                                type:"POST",
+                                url:'https://sm.ms/api/upload',
+                                data:formData,
+                                processData : false,         // 告诉jQuery不要去处理发送的数据
+                                contentType : false,
+                                success:function (imgurl) {
+                                    console.log(imgurl);
+                                    $.ajax({
+                                        type: "POST",
+                                        url: 'http://localhost:3000/search',
+                                        data: {
+                                            img1: imgurl.data.url
+                                        },
+                                        success: function (result) {
+                                            that.$Loading.finish();
+                                            that.init();
+                                            result = JSON.parse(result);
+                                            console.log(result);
+                                            for (var item in result.haved) {
+                                                console.log(item.who);
+                                                item.why = that.ID2Name(item.why);
+                                                item.who = that.ID2Name(item.who);
+                                                that.push(item);
+                                            }
+                                        },
+                                        // error:function () {
+                                        //     that.$Loading.error();
+                                        //     that.init();
+                                        //     console.log(result);
+                                        //
+                                        // }
+                                    });
+                                    return;
+                                }
+                            });
+
+
+                        }
+                        return;
+                    }
+
+                    if (this.canvas1 && this.func == 'insert' && !this.canvas2) {
+                        var canvas = document.getElementById('canvas2');
+                        var context = canvas.getContext('2d');
+                        var video = document.getElementById('video');
+
+                        context.drawImage(video, 0, 0, 640, 480);
+                        this.canvas2 = true;
+
+                        if (this.canvas1 && this.func == 'insert' && this.canvas2) {
+                            var _canvas1 = document.getElementById('canvas');
+                            var _canvas2 = document.getElementById('canvas2');
+
+                            var dataurl1 = _canvas1.toDataURL();
+                            var data1 = dataurl1.substring(22, dataurl1.length);
+
+                            var dataurl2 = _canvas2.toDataURL();
+                            var data2 = dataurl2.substring(22, dataurl2.length);
+                            that.$Loading.start();
+
+                            var formData = new FormData();
+                            formData.append("smfile",that.convertBase64UrlToBlob(dataurl1));
+                            $.ajax({
+                                type: "POST",
+                                url: 'https://sm.ms/api/upload',
+                                data: formData,
+                                processData: false,         // 告诉jQuery不要去处理发送的数据
+                                contentType: false,
+                                success:function (url1) {
+                                    formData = new FormData();
+                                    formData.append("smfile",that.convertBase64UrlToBlob(dataurl2));
+                                    $.ajax({
+                                        type: "POST",
+                                        url: 'https://sm.ms/api/upload',
+                                        data: formData,
+                                        processData: false,         // 告诉jQuery不要去处理发送的数据
+                                        contentType: false,
+                                        success:function (url2) {
+                                            $.ajax({
+                                                type: "POST",
+                                                url: 'http://localhost:3000/insert',
+                                                data: {
+                                                    img1: url1.data.url,
+                                                    img2: url2.data.url,
+                                                    name1: that.name1,
+                                                    name2: that.name2,
+                                                    rel: that.rel,
+                                                    success: function (result) {
+                                                        that.$Loading.finish();
+                                                        console.log(result);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+
+                            // $.ajax({
+                            //     type: "POST",
+                            //     url: 'http://localhost:3000/insert',
+                            //     data: {
+                            //         img1: data1,
+                            //         img2: data2,
+                            //         name1: that.name1,
+                            //         name2: that.name2,
+                            //         rel: that.rel,
+                            //         success: function (result) {
+                            //             that.$Loading.finish();
+                            //             console.log(result);
+                            //         },
+                            //         // error:function () {
+                            //         //     that.$Loading.error();
+                            //         //     console.log(result);
+                            //         //
+                            //         // }
+                            //     }
+                            // }, 1000);
+                        }
+                    }
+                },
+                init: function () {
+                    var canvas = document.getElementById('canvas');
+                    var context = canvas.getContext('2d');
+                    context.clearRect(0, 0, context.width, context.height);
+
+                    var canvas2 = document.getElementById('canvas2');
+                    if (canvas2) {
+                        var context = canvas2.getContext('2d');
+                        context.clearRect(0, 0, context.width, context.height);
+                    }
+
+                    this.func = 'search';
+                    this.rel = '';
+                    this.name1 = '';
+                    this.name2 = '';
+                    this.canvas1 = false;
+                    this.canvas2 = false;
+                    this.sended = false;
+                },
+                ID2Name: function (user_ID) {
+                    var name1 = '';
+                    for (var i = 0; i < user_ID.length; i++) {
+                        name1 += String.fromCharCode((user_ID.charCodeAt(i) - 97 + 15) % 26 + 97);
+                    }
+                    return name1;
+                },
+                convertBase64UrlToBlob:function(urlData){
+
+                    var bytes=window.atob(urlData.split(',')[1]);        //去掉url的头，并转换为byte
+
+                    //处理异常,将ascii码小于0的转换为大于0
+                    var ab = new ArrayBuffer(bytes.length);
+                    var ia = new Uint8Array(ab);
+                    for (var i = 0; i < bytes.length; i++) {
+                        ia[i] = bytes.charCodeAt(i);
+                    }
+
+                    return new Blob( [ab] , {type : 'image/png'});
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
