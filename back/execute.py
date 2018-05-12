@@ -5,15 +5,20 @@ import json
 
 begin = 25
 
-def add_relationship(user_id1, user_id2, info):
+def del_relationship(user_id1, user_id2, info):
   resultjs = cl.invoke('addAsset',
               '''["{}&#@{}&#@{}","test","to record","ZIG","1","lover_test"]'''.format(user_id1,user_id2,info),
               '''97adf9eabe6b698a27371b64c9dc2c65ec275952''')
-  result = json.loads(resultjs)
-  if result["success"] == False:
-    print("add fail")
-  else:
-    print("add success")
+  with open("out.json","w") as fp:
+    fp.write( resultjs )
+
+# invoke('deleteAsset','''["{}-{}"]'''.format(From,To),'''97adf9eabe6b698a27371b64c9dc2c65ec275952''')
+def add_relationship(user_id1, user_id2, info):
+  resultjs = cl.invoke('deleteAsset',
+              '''["{}&#@{}&#@{}"]'''.format(user_id1,user_id2,info),
+              '''97adf9eabe6b698a27371b64c9dc2c65ec275952''')
+  with open("out.json","w") as fp:
+    fp.write( resultjs )
 
 def search_relationship(user_id):
   d = {"haved":{},"lost":{}}
@@ -45,6 +50,6 @@ def search_relationship(user_id):
   with open("out.json","w") as fp:
     json.dump(d,fp, ensure_ascii=False ,indent=2)
 
-
+add_relationship('hqy','yjn','fall in love')
+del_relationship('hqy','yjn','fall in love')
 search_relationship('hqy')
-# add_relationship('hqy','yjn','fall in love')
