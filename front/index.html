@@ -146,10 +146,14 @@
                                 success:function (result) {
                                     that.$Loading.finish();
                                     that.init();
+                                    console.log(result);
+
                                 },
                                 error:function () {
                                     that.$Loading.error();
                                     that.init();
+                                    console.log(result);
+
                                 }
                             });
                             return;
@@ -186,9 +190,11 @@
                                     rel: that.rel,
                                     success:function (result) {
                                         that.$Loading.finish();
+                                        console.log(result);
                                     },
                                     error:function () {
                                         that.$Loading.error();
+                                        console.log(result);
 
                                     }
                                 }
