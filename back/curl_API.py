@@ -2,8 +2,8 @@
 
 import requests
 
-apikey = '5af63cd4292d370012e7f73c'
-chain_name = 'TEST'
+apikey = '5af66c9d292d370012e7f886'
+chain_name = 'lwj3'
 chaincode_name = 'zig-ledger'
 
 query_url = 'https://baas.ziggurat.cn/public-api/call/{}/{}/query?apikey={}'.format(chain_name,chaincode_name,apikey)
