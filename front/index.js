@@ -7,12 +7,15 @@ var querystring = require('querystring');
 var http = require('http');
 var querystring = require('querystring');
 
+var exec = require('child_process').exec;
+
+
+//const
 const api_key = 'bxry2NsPLpWdl-zL9SZgqBHqslXxbM1p';
 const api_secret = 'XdJtVVbqEg4EzwOofqWRiWl_YiZSV_QT';
 const faceset_token = "4d05c631255dd4bc378586224ef58864";
 
-var exec = require('child_process').exec;
-
+//func
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
@@ -67,13 +70,32 @@ app.post('/insert', function (req, res) {
     var img2 = req.body.img2;
     var name1 = req.body.name1;
     var name2 = req.body.name2;
-    var rel = ID2Name(req.body.rel);
+    //pr or pu
+    var pr_pu = req.body.pp;    //todo:confirm this para
+
+    //obfs para
+    var rel;
+    var id0;
+    var id1;
 
     Promise.all([searchInSet(img1), searchInSet(img2)]).then(resultList => {
         console.log(resultList);
         //TODO:所有id都拿到了
 
-        exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+        //obfs
+        if(pp==1){  //private
+            rel = ID2Name(req.body.rel);
+            id0=resultList[0];
+            id1=resultList[1];
+        }
+        else{   //public
+            rel = req.body.rel;
+            id0=name1;
+            id1=name2;
+        }
+
+
+        exec('python3 witharg.py add ' + id0 + ' ' + ' ' + id1 + ' ' + rel + ' ', function (error, stdout, stderr) {
             console.log(stdout);
             res.end(stdout);
         });
@@ -83,7 +105,7 @@ app.post('/insert', function (req, res) {
             console.log(resultList);
             //TODO:to chain
             //var exec = require('child_process').exec;
-            exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+            exec('python3 witharg.py add ' + id0 + ' ' + ' ' + id1 + ' ' + rel + ' ', function (error, stdout, stderr) {
                 console.log(stdout);
                 res.end(stdout);
             });
