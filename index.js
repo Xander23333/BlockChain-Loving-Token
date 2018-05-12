@@ -10,7 +10,9 @@ app.get('/', function (req, res) {
 });
 
 app.post('/search', function (req, res) {
-    console.log(res.body.img1);
+    var img1_base64 = req.body.img1;
+    var img2_base64 = req.body.img2;
+    var rel = req.body.relation;
 })
 
 var server = app.listen(3000, function () {
