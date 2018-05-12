@@ -14,6 +14,7 @@ var exec = require('child_process').exec;
 const api_key = 'bxry2NsPLpWdl-zL9SZgqBHqslXxbM1p';
 const api_secret = 'XdJtVVbqEg4EzwOofqWRiWl_YiZSV_QT';
 const faceset_token = "4d05c631255dd4bc378586224ef58864";
+const salt = "alanqa"
 
 //func
 app.use(bodyParser.json({ limit: '50mb' }));
@@ -56,7 +57,8 @@ app.post('/search', function (req, res) {
     });
     //result
 });
-
+//TODO:add salt
+//decrypt
 function ID2Name(user_ID) {
     var name1 = '';
     for (var i = 0; i < user_ID.length; i++) {
@@ -64,6 +66,19 @@ function ID2Name(user_ID) {
     }
     return name1;
 }
+//encrypt
+function name2ID(name) {
+    var result_name = '';
+    for (var i = 0; i < name.length; i++) {
+        var at = name.charCodeAt(i);
+        at = (at - 97 + 11) % 26;
+        name[i] = String.fromCharCode(at + 97);//a~z only
+        result_name += String.fromCharCode(at + 97);
+    }
+    console.log(result_name);
+    return result_name;
+}
+
 
 app.post('/insert', function (req, res) {
     var img1 = req.body.img1;
@@ -181,7 +196,7 @@ function addIntoSet(imgbase64, name) {
         rq(option_detect).then(result => {//检测人脸
             result = JSON.parse(result);
             var token = result.faces[0].face_token;//只有一个人
-            var user_id = getUserID(name);
+            var user_id = name2ID(name);
             console.log(user_id);
             var content = {
                 api_key: api_key,
@@ -214,19 +229,6 @@ function addIntoSet(imgbase64, name) {
         });
     })
 }
-
-function getUserID(name) {
-    var result_name = '';
-    for (var i = 0; i < name.length; i++) {
-        var at = name.charCodeAt(i);
-        at = (at - 97 + 11) % 26;
-        name[i] = String.fromCharCode(at + 97);//a~z only
-        result_name += String.fromCharCode(at + 97);
-    }
-    console.log(result_name);
-    return result_name;
-}
-
 
 var server = app.listen(3000, function () {
     var host = server.address().address;
