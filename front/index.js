@@ -11,6 +11,8 @@ const api_key = 'bxry2NsPLpWdl-zL9SZgqBHqslXxbM1p';
 const api_secret = 'XdJtVVbqEg4EzwOofqWRiWl_YiZSV_QT';
 const faceset_token = "4d05c631255dd4bc378586224ef58864";
 
+var exec = require('child_process').exec;
+
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
@@ -36,19 +38,28 @@ app.post('/search', function (req, res) {
     };
     rq(options).then(result => {
         console.log(result);
+        result = JSON.parse(result);
+        var ID = result.results[0].user_id;
+        var name1 = ID2Name(ID);
+        console.log(name1);
+
+        exec('python3 witharg.py sch ' + ID + ' ', function (error, stdout, stderr) {
+            console.log(stdout);
+            //TODO:decode id and relation
+            res.end(stdout);
+        });
     }).catch(err => {
         console.log(err);
     });
     //result
-    var ID = result.result[0].user_ID;
-    var name1 = ID2Name(ID);
 });
 
-function ID2Name(user_ID){
-    var name1='';
-    for(var i=0;i<user_ID.length;i++){
-        name1+=String.fromCharCode( (user_ID.charCodeAt(i) - 97 + 15) % 26 + 97 );
+function ID2Name(user_ID) {
+    var name1 = '';
+    for (var i = 0; i < user_ID.length; i++) {
+        name1 += String.fromCharCode((user_ID.charCodeAt(i) - 97 + 15) % 26 + 97);
     }
+    return name1;
 }
 
 app.post('/insert', function (req, res) {
@@ -56,17 +67,26 @@ app.post('/insert', function (req, res) {
     var img2 = req.body.img2;
     var name1 = req.body.name1;
     var name2 = req.body.name2;
-    var rel = req.body.rel;
+    var rel = ID2Name(req.body.rel);
 
     Promise.all([searchInSet(img1), searchInSet(img2)]).then(resultList => {
         console.log(resultList);
         //TODO:所有id都拿到了
+
+        exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+            console.log(stdout);
+            res.end(stdout);
+        });
     }).catch(err => {
         console.log('face api error: ' + err);
         Promise.all([addIntoSet(img1, name1), addIntoSet(img2, name2)]).then(resultList => {//分别获取到两个人user_id且都添加到set内
             console.log(resultList);
-            res.end(resultList[0]);
             //TODO:to chain
+            //var exec = require('child_process').exec;
+            exec('python3 witharg.py add ' + resultList[0] + ' ' + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+                console.log(stdout);
+                res.end(stdout);
+            });
         });
     })
 
