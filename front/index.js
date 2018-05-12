@@ -39,7 +39,17 @@ app.post('/search', function (req, res) {
     }).catch(err => {
         console.log(err);
     });
-})
+    //result
+    var ID = result.result[0].user_ID;
+    var name1 = ID2Name(ID);
+});
+
+function ID2Name(user_ID){
+    var name1='';
+    for(var i=0;i<user_ID.length;i++){
+        name1+=String.fromCharCode( (user_ID.charCodeAt(i) - 97 + 15) % 26 + 97 );
+    }
+}
 
 app.post('/insert', function (req, res) {
     var img1 = req.body.img1;
