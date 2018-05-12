@@ -86,12 +86,16 @@
                         this.canvas1 = true;
                     }
                     if (this.canvas1 && this.func == 'search') {
+                        console.log("post");
                         var canvas = document.getElementById('canvas');
+                        let dataurl = canvas.toDataURL()
+                        var data = dataurl.substring(22, dataurl.length);
+                        console.log(data);
                         $.ajax({
                             type: "POST",
-                            url: ip + 'search',
+                            url: 'http://localhost:3000/search',
                             data: {
-                                img1: canvas.toDataURL()
+                                img1: data
                             }
                         });
                     }
@@ -107,12 +111,18 @@
                     if(this.canvas1 && this.func == 'insert' && this.canvas2){
                         var _canvas1 = document.getElementById('canvas');
                         var _canvas2 = document.getElementById('canvas2');
+
+                        let dataurl1 = _canvas1.toDataURL()
+                        var data1 = dataurl1.substring(22, dataurl.length);
+
+                        let dataurl2 = _canvas2.toDataURL()
+                        var data2 = dataurl2.substring(22, dataurl.length);
                         $.ajax({
                             type: "POST",
-                            url: ip + 'insert',
+                            url: 'http://localhost:3000/insert',
                             data: {
-                                img1: _canvas1.toDataURL(),
-                                img2: _canvas2.toDataURL(),
+                                img1: data1,
+                                img2: data2,
                                 rel: this.rel
                             }
                         });
