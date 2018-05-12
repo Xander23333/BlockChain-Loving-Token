@@ -139,18 +139,22 @@
                             that.$Loading.start();
                             $.ajax({
                                 type: "POST",
-                                url: 'http://localhost:3000/search',
+                                url: 'http://139.198.12.51:3000/search',
                                 data: {
                                     img1: data
                                 },
                                 success:function (result) {
                                     that.$Loading.finish();
                                     that.init();
+                                    console.log(result);
+
                                 },
-                                error:function () {
-                                    that.$Loading.error();
-                                    that.init();
-                                }
+                                // error:function () {
+                                //     that.$Loading.error();
+                                //     that.init();
+                                //     console.log(result);
+                                //
+                                // }
                             });
                             return;
                         }
@@ -177,7 +181,7 @@
                             that.$Loading.start();
                             $.ajax({
                                 type: "POST",
-                                url: 'http://localhost:3000/insert',
+                                url: 'http://139.198.12.51:3000/insert',
                                 data: {
                                     img1: data1,
                                     img2: data2,
@@ -186,11 +190,13 @@
                                     rel: that.rel,
                                     success:function (result) {
                                         that.$Loading.finish();
+                                        console.log(result);
                                     },
-                                    error:function () {
-                                        that.$Loading.error();
-
-                                    }
+                                    // error:function () {
+                                    //     that.$Loading.error();
+                                    //     console.log(result);
+                                    //
+                                    // }
                                 }
                             }, 1000);
                         }
