@@ -6,41 +6,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Face++</title>
+    <!-- import Vue.js -->
+    <script src="//vuejs.org/js/vue.min.js"></script>
+    <!-- import stylesheet -->
+    <link rel="stylesheet" href="//unpkg.com/iview/dist/styles/iview.css">
+    <!-- import iView -->
+    <script src="//unpkg.com/iview/dist/iview.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
     <script type="text/javascript">   
-        window.addEventListener("DOMContentLoaded", function () {
-            // Grab elements, create settings, etc.
-            var video = document.getElementById('video');
+        // let ip = 'localhost/';
+        // window.addEventListener("DOMContentLoaded", function () {
+        //     // Grab elements, create settings, etc.
+        //     var video = document.getElementById('video');
 
-            // Get access to the camera!
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                // Not adding `{ audio: true }` since we only want video now
-                navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
-                    video.src = window.URL.createObjectURL(stream);
-                    video.play();
-                });
-            }
+        //     // Get access to the camera!
+        //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        //         // Not adding `{ audio: true }` since we only want video now
+        //         navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+        //             video.src = window.URL.createObjectURL(stream);
+        //             video.play();
+        //         });
+        //     }
 
-            // Elements for taking the snapshot
-            var canvas = document.getElementById('canvas');
-            var context = canvas.getContext('2d');
-            var video = document.getElementById('video');
+        //     // Elements for taking the snapshot
+        //     var canvas = document.getElementById('canvas');
+        //     var context = canvas.getContext('2d');
+        //     var video = document.getElementById('video');
 
-            // Trigger photo take
-            document.getElementById("snap").addEventListener("click", function () {
-                context.drawImage(video, 0, 0, 640, 480);
-                console.log(canvas.toDataURL());
-            });
-        });
+        //     // Trigger photo take
+        //     document.getElementById("snap").addEventListener("click", function () {
+        //         context.drawImage(video, 0, 0, 640, 480);
+        //         $.post(ip + app.func, )
+        //     });
+        // });
     </script>
 </head>
 
 <body>
-    <video id="video" width="640" height="480" autoplay></video>
-    <br>
-    <button id="snap">点击拍照</button>
-    <br>
-    <canvas id="canvas" width="640" height="480"></canvas>
     <!-- <input id="upload" type="file" accept="image/*;" capture="camera"> -->
+    <div id="app">
+        <video id="video" width="640" height="480" autoplay></video>
+        <i-button type="primary" id="snap" @click="snap">点击拍照</i-button>
+        <canvas id="canvas" width="640" height="480"></canvas>
+        <i-select v-model="func" style="width:200px">
+            <i-option :value="'search'">查询</i-option>
+            <i-option :value="'insert'">录入</i-option>
+        </i-select>
+    </div>
+    <script>
+        new Vue({
+            el: '#app',
+            mounted: function () {
+                window.addEventListener("DOMContentLoaded", function () {
+                    // Grab elements, create settings, etc.
+                    var video = document.getElementById('video');
+
+                    // Get access to the camera!
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        // Not adding `{ audio: true }` since we only want video now
+                        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+                            video.src = window.URL.createObjectURL(stream);
+                            video.play();
+                        });
+                    }
+                });
+            },
+            data: {
+                visible: false,
+                func: 'search'
+            },
+            methods: {
+                snap:function () {
+                    // Elements for taking the snapshot
+                    var canvas = document.getElementById('canvas');
+                    var context = canvas.getContext('2d');
+                    var video = document.getElementById('video');
+
+                    context.drawImage(video, 0, 0, 640, 480);
+                    
+            }
+        })
+    </script>
 </body>
 
 </html>
