@@ -146,8 +146,11 @@
                                 success:function (result) {
                                     that.$Loading.finish();
                                     that.init();
+                                    result = JSON.parse(result);
                                     console.log(result);
-
+                                    for(var item in result.haved){
+                                        console.log(item.who);
+                                    }
                                 },
                                 // error:function () {
                                 //     that.$Loading.error();

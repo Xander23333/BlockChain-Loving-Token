@@ -15,7 +15,14 @@ var exec = require('child_process').exec;
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
+app.all('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    // res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    // res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    // res.header("X-Powered-By",' 3.2.1')
+    // res.header("Content-Type", "application/json;charset=utf-8");
+    next();
+});
 app.get('/', function (req, res) {
     res.send('Hello World!');
 });
@@ -110,6 +117,40 @@ app.get('/clearSet', function (req, res) {
     }
     rq(option_del).then(result => {
         console.log(result);
+    })
+});
+
+app.get('/getAll', function (req, res) {
+    var content = {
+        api_key: api_key,
+        api_secret: api_secret,
+        faceset_token: faceset_token
+    }
+    var option_get = {
+        uri: 'https://api-cn.faceplusplus.com/facepp/v3/faceset/getdetail',
+        method: 'POST',
+        form: content
+    }
+    rq(option_get).then(result => {
+        console.log(result.toString());
+        result = JSON.parse(result);
+        for (let i = 0; i < result.face_tokens.length; i++){
+            var content = {
+                api_key: api_key,
+                api_secret: api_secret,
+                face_token: result.face_tokens[i],
+                faceset_token: faceset_token
+            }
+            var option_search = {
+                uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
+                method: 'POST',
+                form: content
+            }
+            rq(option_search).then(fresult => {
+                fresult = JSON.parse(fresult);
+                console.log(fresult.results[0].user_id); 
+            });
+        }
     })
 });
 
