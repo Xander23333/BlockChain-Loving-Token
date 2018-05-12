@@ -61,5 +61,3 @@ def search_relationship(user_id):
     d["haved"][block["id"]] = {"when":when,"who":who,"why":why}
 
   print(json.dumps(d, ensure_ascii=False ,indent=2))
-
-search_relationship('t2238usr1')
