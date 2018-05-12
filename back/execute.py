@@ -5,7 +5,7 @@ account = '3ddba2981c42cecdfee9e845e5615ffc721f1daa'
 import curl_API as cl
 import json 
 
-begin = 25
+begin = 1 # 截止块，截止后链为严格按照格式生成的可检索块
 
 #initUSR=''' curl -X POST  -H'Content-Type: application/json'  -d '{"func": "addUser", "params": ["lover_test","20"],"account":"8d8beaeff23e1a25893a1f1a5d2d428afc183c52"}' 'https://baas.ziggurat.cn/public-api/call/mumhelpme/zig-ledger/query?apikey=5af63cd4292d370012e7f73c' '''
 def init_acccount():
@@ -64,6 +64,7 @@ def search_relationship(user_id):
   
   print(json.dumps(d, ensure_ascii=False ,indent=2))
 
+# search_relationship('t2238usr1')
 # print(cl.query('queryUser','["lover_test"]'))
 # del_relationship('hqy','yjn','fall in love')
 # add_relationship('hqy00','hqy00','fall in love')

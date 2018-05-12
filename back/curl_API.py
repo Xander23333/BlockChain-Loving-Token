@@ -15,21 +15,24 @@ import json
 
 import os
 def query(func, params): # Tested
-  query_order = " curl -X POST  -H'Content-Type: application/json'  -d "+\
+  query_order = " curl -s -X POST  -H'Content-Type: application/json'  -d "+\
                   " \'{{\"func\": \"{}\", \"params\": {} }}\' ".format(func,params)+\
                   "\'{}\'".format(query_url)
   textlist = os.popen(query_order).readlines()[0]
   return ( json.dumps(json.loads(textlist),indent = 2) )
 
 def invoke(func, params,account): # Tested
-  invoke_order = " curl -X POST  -H'Content-Type: application/json'  -d "+\
+  invoke_order = " curl -s -X POST  -H'Content-Type: application/json'  -d "+\
                   " \'{{\"func\": \"{}\", \"params\": {},\"account\":\"{}\"}}\' ".format(func,params,account)+\
                   "\'{}\'".format(invoke_url)
   textlist = os.popen(invoke_order).readlines()[0]
   return ( json.dumps(json.loads(textlist),indent = 2) )
 
 def blocks(): # Tested
-  blocks_order = ''' curl '{}' '''.format(blocks_url)
-  print(blocks_order)
+  blocks_order = ''' curl -s '{}' '''.format(blocks_url)
   textlist = os.popen(blocks_order).readlines()[0]
-  return ( json.dumps(json.loads(textlist),indent = 2) )
+  # print(json.dumps(json.loads(textlist),indent = 2))
+  d = json.dumps(json.loads(textlist),indent = 2) 
+  with open("log.json","w") as fp:
+    fp.write(d)
+  return d
