@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Face++</title>
+    <script type="text/javascript">   
+        window.addEventListener("DOMContentLoaded", function () {
+            // Grab elements, create settings, etc.
+            var video = document.getElementById('video');
+
+            // Get access to the camera!
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // Not adding `{ audio: true }` since we only want video now
+                navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+                    video.src = window.URL.createObjectURL(stream);
+                    video.play();
+                });
+            }
+
+            // Elements for taking the snapshot
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var video = document.getElementById('video');
+
+            // Trigger photo take
+            document.getElementById("snap").addEventListener("click", function () {
+                context.drawImage(video, 0, 0, 640, 480);
+                console.log(canvas.toDataURL());
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <video id="video" width="640" height="480" autoplay></video>
+    <br>
+    <button id="snap">点击拍照</button>
+    <br>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <!-- <input id="upload" type="file" accept="image/*;" capture="camera"> -->
+</body>
+
+</html>
