@@ -20,28 +20,6 @@ app.get('/', function (req, res) {
 app.post('/search', function (req, res) {
     var img1_base64 = req.body.img1;
     // post=api_key+api_secret+image_base64+face_set
-    var post_data = {
-
-    };
-    // var content = querystring.stringify(post_data);
-    // //post!
-    // var req = http.request(options, function (res) {
-    //     console.log('STATUS: ' + res.statusCode);
-    //     console.log('HEADERS: ' + JSON.stringify(res.headers));
-    //     res.setEncoding('utf8');
-    //     res.on('data', function (chunk) {
-    //         console.log('BODY: ' + chunk);
-    //         //JSON.parse(chunk)  
-    //     });
-    // });
-    // req.on('error', function (e) {
-    //     console.log('problem with request: ' + e.message);
-    // });
-    // // write data to request body    
-    // req.write(content);
-    // req.end();
-
-
     var options = {
         uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
         method: 'POST',
@@ -81,7 +59,17 @@ app.post('/insert', function (req, res) {
     }).catch(err => {
         console.log('face api error: ' + err);
     });
+    //result
+    var ID = result.result[0].user_ID;
+    var name1 = ID2Name(ID);
 });
+
+function ID2Name(user_ID){
+    var name1='';
+    for(var i=0;i<user_ID.length;i++){
+        name1+=String.fromCharCode( (user_ID.charCodeAt(i) - 97 + 15) % 26 + 97 );
+    }
+}
 
 var server = app.listen(3000, function () {
     var host = server.address().address;
