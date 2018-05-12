@@ -47,6 +47,8 @@
                 </i-select>
                 <i-button type="primary" @click="snap">拍照</i-button>
                 <i-input v-model="rel" placeholder="输入关系.." style="width: 300px" v-if="func == 'insert'"></i-input>
+                <i-input v-model="name1" placeholder="name1" style="width: 300px" v-if="func == 'insert'"></i-input>
+                <i-input v-model="name2" placeholder="name2" style="width: 300px" v-if="func == 'insert'"></i-input>
             </i-col>
         </Row>
     </div>
@@ -72,11 +74,15 @@
                 visible: false,
                 func: 'search',
                 rel:'',
+                name1:'',
+                name2:'',
                 canvas1: false,
-                canvas2: false
+                canvas2: false,
+                sended:false
             },
             methods: {
                 snap: function () {
+                    var that = this;
                     if (!this.canvas1) {
                         var canvas = document.getElementById('canvas');
                         var context = canvas.getContext('2d');
@@ -84,21 +90,25 @@
 
                         context.drawImage(video, 0, 0, 640, 480);
                         this.canvas1 = true;
+
+                        if (this.canvas1 && this.func == 'search') {
+                            console.log("post");
+                            var canvas = document.getElementById('canvas');
+                            let dataurl = canvas.toDataURL();
+                            var data = dataurl.substring(22, dataurl.length);
+                            console.log(data);
+                            $.ajax({
+                                type: "POST",
+                                url: 'http://localhost:3000/search',
+                                data: {
+                                    img1: data
+                                }
+                            });
+                            return;
+                        }
+                        return;
                     }
-                    if (this.canvas1 && this.func == 'search') {
-                        console.log("post");
-                        var canvas = document.getElementById('canvas');
-                        let dataurl = canvas.toDataURL()
-                        var data = dataurl.substring(22, dataurl.length);
-                        console.log(data);
-                        $.ajax({
-                            type: "POST",
-                            url: 'http://localhost:3000/search',
-                            data: {
-                                img1: data
-                            }
-                        });
-                    }
+
                     if (this.canvas1 && this.func == 'insert' && !this.canvas2) {
                         var canvas = document.getElementById('canvas2');
                         var context = canvas.getContext('2d');
@@ -106,26 +116,29 @@
 
                         context.drawImage(video, 0, 0, 640, 480);
                         this.canvas2 = true;
-                    }
 
-                    if(this.canvas1 && this.func == 'insert' && this.canvas2){
-                        var _canvas1 = document.getElementById('canvas');
-                        var _canvas2 = document.getElementById('canvas2');
+                        if(this.canvas1 && this.func == 'insert' && this.canvas2){
+                            var _canvas1 = document.getElementById('canvas');
+                            var _canvas2 = document.getElementById('canvas2');
 
-                        let dataurl1 = _canvas1.toDataURL()
-                        var data1 = dataurl1.substring(22, dataurl.length);
+                            var dataurl1 = _canvas1.toDataURL();
+                            var data1 = dataurl1.substring(22, dataurl1.length);
 
-                        let dataurl2 = _canvas2.toDataURL()
-                        var data2 = dataurl2.substring(22, dataurl.length);
-                        $.ajax({
-                            type: "POST",
-                            url: 'http://localhost:3000/insert',
-                            data: {
-                                img1: data1,
-                                img2: data2,
-                                rel: this.rel
-                            }
-                        });
+                            var dataurl2 = _canvas2.toDataURL();
+                            var data2 = dataurl2.substring(22, dataurl2.length);
+                            $.ajax({
+                                type: "POST",
+                                url: 'http://localhost:3000/insert',
+                                data: {
+                                    img1: data1,
+                                    img2: data2,
+                                    name1: that.name1,
+                                    name2: that.name2,
+                                    rel: that.rel
+                                }
+                            }, 1000);
+
+                        }
                     }
                 }
             }
