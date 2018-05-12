@@ -62,7 +62,7 @@ app.post('/search', function (req, res) {
     // });
     //result
 
-    img2ID(img1_url).then(user_id=>{
+    img2ID(img1_url).then(user_id => {
         exec('python3 witharg.py sch ' + user_id + ' ', function (error, stdout, stderr) {
             console.log(stdout);
             //TODO:decode id and relation
@@ -132,7 +132,7 @@ app.post('/insert', function (req, res) {
             res.write(stdout);
             res.end();
         });
-    }).catch(err=>{
+    }).catch(err => {
         console.log(err);
     })
 });
@@ -303,36 +303,40 @@ var DebugLogOutput = 1;
 function detect(imgurl) { //use detect API, return faceID
     return new Promise(function (resolve, reject) {
         var content_azure_detect = {
-            'url': imgurl
+            url: imgurl
         }
         var header_azure_detect = {
-            'Ocp-Apim-Subscription-Key': api_key_azure
+            'Ocp-Apim-Subscription-Key': api_key_azure,
+            'content-type': 'application/json'
         }
         var option_detect_azure = {
             uri: 'https://' + server_loc + uri_str + 'detect',
             method: 'POST',
             headers: header_azure_detect,
-            form: content_azure_detect
+            body: content_azure_detect,
+            json:true
         }
         //send req
         rq(option_detect_azure).then(result => {
-            result = JSON.parse(result);
+            //result = JSON.parse(result);
             //debugger
             if (DebugLogOutput == 1) {
                 console.log(result);
             }
             //maybe func here
-            resolve(result.faceId);
+            resolve(result[0].faceId);
+        }).catch(err => {
+            console.log('detect err' + err);
         });
     })
 }
 /*查找 */
-function identify(name, faceID) { //use identify API, if find, return id; if not, return 'No'
+function identify(imgurl, name, faceID) { //use identify API, if find, return id; if not, return 'No'
     return new Promise(function (resolve, reject) {
         var content_azure_identify = {
-            'faceIds': [faceID],
-            'personGroupId': personGroupID,
-            "maxNumOfCandidatesReturned": 1
+            faceIds: [faceID],
+            personGroupId: personGroupID,
+            maxNumOfCandidatesReturned: 1
         }
         var header_azure_identify = {
             'Ocp-Apim-Subscription-Key': api_key_azure
@@ -341,25 +345,43 @@ function identify(name, faceID) { //use identify API, if find, return id; if not
             uri: 'https://' + server_loc + uri_str + 'identify',
             method: 'POST',
             headers: header_azure_identify,
-            form: content_azure_identify
+            body: content_azure_identify,
+            json:true
         }
+        console.log(JSON.stringify(option_id_azure));
         //send req
         rq(option_id_azure).then(result => {
-            result = JSON.parse(result);
+            //result = JSON.parse(result);
             //debugger
             if (DebugLogOutput == 1) {
                 console.log(result);
             }
             //maybe func here
             if (result[0].candidates[0].confidence > Threshold) {
-                resolve(esult[0].candidates[0].personId);
+                resolve(result[0].candidates[0].personId);
             }
             else {
                 //resolve('No');
                 createPerson(name).then(pid => {
-                    resolve(pid);
+                    addFace(imgurl, pid).then(() => {
+                        var headers = {
+                            'Ocp-Apim-Subscription-Key': api_key_azure
+                        }
+                        var option_train = {
+                            uri: 'https://' + server_loc + uri_str +'persongroups/' + personGroupID +  '/train',
+                            method: 'POST',
+                            headers: headers,
+                            json:true
+                        }
+                        rq(option_train).then();
+                        resolve(pid);
+                    })
+                }).catch(err => {
+                    console.log('err create');
                 })
             }
+        }).catch(err => {
+            console.log('identify err' + err);
         });
     })
 }
@@ -368,7 +390,7 @@ function createPerson(name) { //use createPerson API, return personID
     return new Promise(function (resolve, reject) {
         var id = name2ID(name);
         var content_azure_createperson = {
-            'name': id
+            name: id
             //userData:'describe'
         }
         var header_azure_createperson = {
@@ -378,17 +400,20 @@ function createPerson(name) { //use createPerson API, return personID
             uri: 'https://' + server_loc + uri_str + 'persongroups/' + personGroupID + '/persons',
             method: 'POST',
             headers: header_azure_createperson,
-            form: content_azure_createperson
+            body: content_azure_createperson,
+            json:true
         }
         //send req
         rq(option_cp_azure).then(result => {
-            result = JSON.parse(result);
+            //result = JSON.parse(result);
             //debugger
             if (DebugLogOutput == 1) {
                 console.log(result);
             }
             //maybe func here
             resolve(result.personId);
+        }).catch(err => {
+            console.log('create err');
         });
     })
 }
@@ -396,7 +421,7 @@ function createPerson(name) { //use createPerson API, return personID
 function addFace(imgurl, id) { //use addFace API
     return new Promise(function (resolve, reject) {
         var content_azure_addface = {
-            'url': imgurl
+            url: imgurl
         }
         var header_azure_addface = {
             'Ocp-Apim-Subscription-Key': api_key_azure
@@ -405,16 +430,20 @@ function addFace(imgurl, id) { //use addFace API
             uri: 'https://' + server_loc + uri_str + 'persongroups/' + personGroupID + '/persons/' + id + '/persistedFaces',
             method: 'POST',
             headers: header_azure_addface,
-            form: content_azure_addface
+            body: content_azure_addface,
+            json:true
         }
         //send req
         rq(option_af_azure).then(result => {
-            result = JSON.parse(result);
+            //result = JSON.parse(result);
             //debugger
             if (DebugLogOutput == 1) {
                 console.log(result);
             }
             //maybe func here
+            resolve();
+        }).catch(err => {
+            console.log('addFace err');
         });
     })
 }
@@ -429,34 +458,38 @@ function convert(personID) { //use addFace API
         }
         var option_convert_azure = {
             uri: 'https://' + server_loc + uri_str + 'persongroups/' + personGroupID + '/persons/' + personID,
-            method: 'POST',
+            method: 'GET',
             headers: header_azure_convert,
-            form: content_azure_convert
+            //body: content_azure_convert,
+            json:true
         }
         //send req
         rq(option_convert_azure).then(result => {
-            result = JSON.parse(result);
+            //result = JSON.parse(result);
             //debugger
             if (DebugLogOutput == 1) {
                 console.log(result);
             }
             //maybe func here
             resolve(result.name);
+        }).catch(err => {
+            console.log('convert err' + err);
         });
     })
 }
 //func img2ID
 function img2ID(imgurl, name) { //use addFace API, name can be an empty string
-    return new Promise(function(resolve, reject){
+    return new Promise(function (resolve, reject) {
         detect(imgurl).then(faceid => {
-            identify(name, faceid).then(personid => {
+            identify(imgurl, name, faceid).then(personid => {
                 addFace(imgurl, personid).then(() => {
                     convert(personid).then(uID => {
+                        console.log('finished');
                         resolve(uID);
                     })
                 })
             })
-        });
+        })
     })
     // var pID = identify(face_id);
     // if(pID == 'No'){

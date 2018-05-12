@@ -175,7 +175,7 @@
                                         type: "POST",
                                         url: 'http://localhost:3000/search',
                                         data: {
-                                            img1: imgurl
+                                            img1: imgurl.data.url
                                         },
                                         success: function (result) {
                                             that.$Loading.finish();
@@ -246,8 +246,8 @@
                                                 type: "POST",
                                                 url: 'http://localhost:3000/insert',
                                                 data: {
-                                                    img1: url1,
-                                                    img2: url2,
+                                                    img1: url1.data.url,
+                                                    img2: url2.data.url,
                                                     name1: that.name1,
                                                     name2: that.name2,
                                                     rel: that.rel,
