@@ -24,25 +24,6 @@ app.post('/search', function (req, res) {
     var post_data = {
 
     };
-    // var content = querystring.stringify(post_data);
-    // //post!
-    // var req = http.request(options, function (res) {
-    //     console.log('STATUS: ' + res.statusCode);
-    //     console.log('HEADERS: ' + JSON.stringify(res.headers));
-    //     res.setEncoding('utf8');
-    //     res.on('data', function (chunk) {
-    //         console.log('BODY: ' + chunk);
-    //         //JSON.parse(chunk)  
-    //     });
-    // });
-    // req.on('error', function (e) {
-    //     console.log('problem with request: ' + e.message);
-    // });
-    // // write data to request body    
-    // req.write(content);
-    // req.end();
-
-
     var options = {
         uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
         method: 'POST',
@@ -77,38 +58,6 @@ app.post('/insert', function (req, res) {
     var name2 = req.body.name2;
     var rel = req.body.rel;
 
-    // var content = {
-    //     api_key: api_key,
-    //     api_secret: api_secret,
-    //     image_base64: img1,
-    //     faceset_token: faceset_token
-    // }
-    // var option_search = {
-    //     uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
-    //     method: 'POST',
-    //     form: content
-    // }
-    // rq(option_search).then(result => {//faceset里面有人
-    //     result = JSON.parse(result);
-    //     console.log(result);
-    //     if (result.reslts[0] < 70) {
-    //         addIntoSet(img1, name1).then(id => {
-    //             user1 = id;
-    //         });
-    //     }
-    //     else {
-    //         user1 = result.results[0].user_id;
-    //     }
-
-    // }).catch(err => {
-    //     console.log('face api error: ' + err);
-    //     Promise.all([addIntoSet(img1, name1), addIntoSet(img2, name2)]).then(resultList => {//分别获取到两个人user_id且都添加到set内
-    //         console.log(resultList);
-    //         res.end(resultList[0]);
-    //         
-    //     });
-    // });
-
     Promise.all([searchInSet(img1), searchInSet(img2)]).then(resultList => {
         console.log(resultList);
         //TODO:所有id都拿到了
@@ -125,23 +74,7 @@ app.post('/insert', function (req, res) {
 });
 
 app.get('/clearSet', function (req, res) {
-    // /*------获取set列表------*/
-    // var content = {
-    //     api_key: api_key,
-    //     api_secret: api_secret,
-    //     faceset_token: faceset_token
-    // }
-    // var option_get = {
-    //     uri: 'https://api-cn.faceplusplus.com/facepp/v3/faceset/getdetail',
-    //     method: 'POST',
-    //     form: content
-    // }
-    // rq(option_get).then(result => {
-    //     result = JSON.parse(result);
-    //     for (var i = 0; i < result.face_tokens.length; i++) {
-
-    //     }
-    // });
+    /*------获取set列表------*/
     var content = {
         api_key: api_key,
         api_secret: api_secret,
@@ -241,14 +174,15 @@ function addIntoSet(imgbase64, name) {
 }
 
 function getUserID(name) {
+    var result_name = '';
     for (var i = 0; i < name.length; i++) {
         var at = name.charCodeAt(i);
         at = (at - 97 + 11) % 26;
         name[i] = String.fromCharCode(at + 97);//a~z only
-        name.splice(i, 1, String.fromCharCode(at + 97));
+        result_name += String.fromCharCode(at + 97);
     }
-    console.log(name);
-    return name;
+    console.log(result_name);
+    return result_name;
 }
 
 
