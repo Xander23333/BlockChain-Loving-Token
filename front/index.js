@@ -45,7 +45,7 @@ app.post('/search', function (req, res) {
 
         exec('python3 witharg.py sch ' + ID + ' ', function (error, stdout, stderr) {
             console.log(stdout);
-            //TODO:decode id
+            //TODO:decode id and relation
             res.end(stdout);
         });
     }).catch(err => {
@@ -67,7 +67,7 @@ app.post('/insert', function (req, res) {
     var img2 = req.body.img2;
     var name1 = req.body.name1;
     var name2 = req.body.name2;
-    var rel = req.body.rel;
+    var rel = ID2Name(req.body.rel);
 
     Promise.all([searchInSet(img1), searchInSet(img2)]).then(resultList => {
         console.log(resultList);
