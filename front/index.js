@@ -357,7 +357,7 @@ function identify(imgurl, name, faceID) { //use identify API, if find, return id
                 console.log(result);
             }
             //maybe func here
-            if (result[0].candidates[0].confidence > Threshold) {
+            if (result[0].candidates[0] && result[0].candidates[0].confidence > Threshold) {
                 resolve(result[0].candidates[0].personId);
             }
             else {
@@ -377,7 +377,7 @@ function identify(imgurl, name, faceID) { //use identify API, if find, return id
                         resolve(pid);
                     })
                 }).catch(err => {
-                    console.log('err create');
+                    console.log('err create' + err);
                 })
             }
         }).catch(err => {
@@ -388,7 +388,7 @@ function identify(imgurl, name, faceID) { //use identify API, if find, return id
 /*没注册在group里面的,先添加到group */
 function createPerson(name) { //use createPerson API, return personID
     return new Promise(function (resolve, reject) {
-        var id = name2ID(name);
+        var id = Name2ID(name);
         var content_azure_createperson = {
             name: id
             //userData:'describe'
@@ -443,7 +443,7 @@ function addFace(imgurl, id) { //use addFace API
             //maybe func here
             resolve();
         }).catch(err => {
-            console.log('addFace err');
+            console.log('addFace err' + err);
         });
     })
 }
