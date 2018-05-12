@@ -3,6 +3,9 @@ var app = express();
 var bodyParser = require('body-parser');
 var rq = require('request-promise');
 var querystring = require('querystring');
+var fs = require('fs');
+var request = require('request');
+var path = require('path');
 
 var http = require('http');
 var querystring = require('querystring');
@@ -15,7 +18,7 @@ var exec = require('child_process').exec;
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.all('*', function(req, res, next) {
+app.all('*', function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     // res.header("Access-Control-Allow-Headers", "X-Requested-With");
     // res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
@@ -30,34 +33,35 @@ app.get('/', function (req, res) {
 app.post('/search', function (req, res) {
     var img1_base64 = req.body.img1;
     // post=api_key+api_secret+image_base64+face_set
-    var post_data = {
 
-    };
-    var options = {
-        uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
-        method: 'POST',
-        form: {
-            api_key: api_key,
-            api_secret: api_secret,
-            image_base64: img1_base64,
-            faceset_token: faceset_token
-        }
-    };
-    rq(options).then(result => {
-        console.log(result);
-        result = JSON.parse(result);
-        var ID = result.results[0].user_id;
-        var name1 = ID2Name(ID);
+    // var post_data = {
 
-        exec('python3 witharg.py sch ' + ID + ' ', function (error, stdout, stderr) {
-            console.log(stdout);
-            //TODO:decode id and relation
-            res.end(stdout);
-        });
-    }).catch(err => {
-        console.log(err);
-    });
-    //result
+    // };
+    // var options = {
+    //     uri: 'https://api-cn.faceplusplus.com/facepp/v3/search',
+    //     method: 'POST',
+    //     form: {
+    //         api_key: api_key,
+    //         api_secret: api_secret,
+    //         image_base64: img1_base64,
+    //         faceset_token: faceset_token
+    //     }
+    // };
+    // rq(options).then(result => {
+    //     console.log(result);
+    //     result = JSON.parse(result);
+    //     var ID = result.results[0].user_id;
+    //     var name1 = ID2Name(ID);
+
+    //     exec('python3 witharg.py sch ' + ID + ' ', function (error, stdout, stderr) {
+    //         console.log(stdout);
+    //         //TODO:decode id and relation
+    //         res.end(stdout);
+    //     });
+    // }).catch(err => {
+    //     console.log(err);
+    // });
+    // //result
 });
 
 function ID2Name(user_ID) {
@@ -73,13 +77,13 @@ app.post('/insert', function (req, res) {
     var img2 = req.body.img2;
     var name1 = req.body.name1;
     var name2 = req.body.name2;
-    var rel = ID2Name(req.body.rel);
+    var rel = getUserID(req.body.rel);
 
     Promise.all([searchInSet(img1), searchInSet(img2)]).then(resultList => {
         console.log(resultList);
         //TODO:所有id都拿到了
 
-        exec('python3 witharg.py add ' + resultList[0] + ' '  + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
+        exec('python3 witharg.py add ' + resultList[0] + ' ' + resultList[1] + ' ' + rel + ' ', function (error, stdout, stderr) {
             console.log(error);
             console.log(stdout);
             console.log(stderr);
@@ -98,8 +102,6 @@ app.post('/insert', function (req, res) {
             });
         });
     })
-
-
 });
 
 app.get('/clearSet', function (req, res) {
@@ -134,7 +136,7 @@ app.get('/getAll', function (req, res) {
     rq(option_get).then(result => {
         console.log(result.toString());
         result = JSON.parse(result);
-        for (let i = 0; i < result.face_tokens.length; i++){
+        for (var i = 0; i < result.face_tokens.length; i++) {
             var content = {
                 api_key: api_key,
                 api_secret: api_secret,
@@ -148,7 +150,7 @@ app.get('/getAll', function (req, res) {
             }
             rq(option_search).then(fresult => {
                 fresult = JSON.parse(fresult);
-                console.log(fresult.results[0].user_id); 
+                console.log(fresult.results[0].user_id);
             });
         }
     })
@@ -247,7 +249,6 @@ function getUserID(name) {
     console.log(result_name);
     return result_name;
 }
-
 
 var server = app.listen(3000, function () {
     var host = server.address().address;

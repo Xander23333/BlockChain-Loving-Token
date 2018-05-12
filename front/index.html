@@ -56,6 +56,17 @@
             padding-left: 5px;
             z-index: 100000;
         }
+
+        .title{
+            font-size: 20px;
+            font-weight: 800;
+        }
+        .desription{
+            font-weight: 500;
+        }
+        .time{
+            color: #333333;
+        }
     </style>
 </head>
 
@@ -89,6 +100,18 @@
                 <i-input v-model="name2" placeholder="name2" style="width: 300px" v-if="func == 'insert'"></i-input>
             </i-col>
         </Row>
+
+        <Row type="flex" justify="center" class="code-row-bg">
+            <i-col span="4">
+                <time-line v-for="item in timeLine_result" :key="item.who" style="margin-top: 20px;">
+                    <timeline-item>
+                        <p class="title">{{item.who}}</p>
+                        <p class="desription">{{item.why}}</p>
+                        <p class="time">{{item.when}}</p>
+                    </timeline-item>
+                </time-line>
+            </i-col>
+        </Row>
     </div>
     <script>
         new Vue({
@@ -118,7 +141,7 @@
                 canvas1: false,
                 canvas2: false,
                 sended:false,
-                timeLine_result:{}
+                timeLine_result:[]
             },
             methods: {
                 snap: function () {
@@ -137,29 +160,47 @@
                             let dataurl = canvas.toDataURL();
                             var data = dataurl.substring(22, dataurl.length);
                             that.$Loading.start();
+
+                            var formData = new FormData();
+                            formData.append("smfile",that.convertBase64UrlToBlob(dataurl));
                             $.ajax({
-                                type: "POST",
-                                url: 'http://139.198.12.51:3000/search',
-                                data: {
-                                    img1: data
-                                },
-                                success:function (result) {
-                                    that.$Loading.finish();
-                                    that.init();
-                                    result = JSON.parse(result);
-                                    console.log(result);
-                                    for(var item in result.haved){
-                                        console.log(item.who);
-                                    }
-                                },
-                                // error:function () {
-                                //     that.$Loading.error();
-                                //     that.init();
-                                //     console.log(result);
-                                //
-                                // }
+                                type:"POST",
+                                url:'https://sm.ms/api/upload',
+                                data:formData,
+                                processData : false,         // 告诉jQuery不要去处理发送的数据
+                                contentType : false,
+                                success:function (imgurl) {
+                                    console.log(imgurl);
+                                    $.ajax({
+                                        type: "POST",
+                                        url: 'http://localhost:3000/search',
+                                        data: {
+                                            img1: imgurl
+                                        },
+                                        success: function (result) {
+                                            that.$Loading.finish();
+                                            that.init();
+                                            result = JSON.parse(result);
+                                            console.log(result);
+                                            for (var item in result.haved) {
+                                                console.log(item.who);
+                                                item.why = that.ID2Name(item.why);
+                                                item.who = that.ID2Name(item.who);
+                                                that.push(item);
+                                            }
+                                        },
+                                        // error:function () {
+                                        //     that.$Loading.error();
+                                        //     that.init();
+                                        //     console.log(result);
+                                        //
+                                        // }
+                                    });
+                                    return;
+                                }
                             });
-                            return;
+
+
                         }
                         return;
                     }
@@ -172,7 +213,7 @@
                         context.drawImage(video, 0, 0, 640, 480);
                         this.canvas2 = true;
 
-                        if(this.canvas1 && this.func == 'insert' && this.canvas2){
+                        if (this.canvas1 && this.func == 'insert' && this.canvas2) {
                             var _canvas1 = document.getElementById('canvas');
                             var _canvas2 = document.getElementById('canvas2');
 
@@ -182,47 +223,106 @@
                             var dataurl2 = _canvas2.toDataURL();
                             var data2 = dataurl2.substring(22, dataurl2.length);
                             that.$Loading.start();
+
+                            var formData = new FormData();
+                            formData.append("smfile",that.convertBase64UrlToBlob(dataurl1));
                             $.ajax({
                                 type: "POST",
-                                url: 'http://139.198.12.51:3000/insert',
-                                data: {
-                                    img1: data1,
-                                    img2: data2,
-                                    name1: that.name1,
-                                    name2: that.name2,
-                                    rel: that.rel,
-                                    success:function (result) {
-                                        that.$Loading.finish();
-                                        console.log(result);
-                                    },
-                                    // error:function () {
-                                    //     that.$Loading.error();
-                                    //     console.log(result);
-                                    //
-                                    // }
+                                url: 'https://sm.ms/api/upload',
+                                data: formData,
+                                processData: false,         // 告诉jQuery不要去处理发送的数据
+                                contentType: false,
+                                success:function (url1) {
+                                    formData = new FormData();
+                                    formData.append("smfile",that.convertBase64UrlToBlob(dataurl2));
+                                    $.ajax({
+                                        type: "POST",
+                                        url: 'https://sm.ms/api/upload',
+                                        data: formData,
+                                        processData: false,         // 告诉jQuery不要去处理发送的数据
+                                        contentType: false,
+                                        success:function (url2) {
+                                            $.ajax({
+                                                type: "POST",
+                                                url: 'http://localhost:3000/insert',
+                                                data: {
+                                                    img1: url1,
+                                                    img2: url2,
+                                                    name1: that.name1,
+                                                    name2: that.name2,
+                                                    rel: that.rel,
+                                                    success: function (result) {
+                                                        that.$Loading.finish();
+                                                        console.log(result);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
                                 }
-                            }, 1000);
+                            });
+
+                            // $.ajax({
+                            //     type: "POST",
+                            //     url: 'http://localhost:3000/insert',
+                            //     data: {
+                            //         img1: data1,
+                            //         img2: data2,
+                            //         name1: that.name1,
+                            //         name2: that.name2,
+                            //         rel: that.rel,
+                            //         success: function (result) {
+                            //             that.$Loading.finish();
+                            //             console.log(result);
+                            //         },
+                            //         // error:function () {
+                            //         //     that.$Loading.error();
+                            //         //     console.log(result);
+                            //         //
+                            //         // }
+                            //     }
+                            // }, 1000);
                         }
                     }
                 },
-                init:function () {
+                init: function () {
                     var canvas = document.getElementById('canvas');
                     var context = canvas.getContext('2d');
                     context.clearRect(0, 0, context.width, context.height);
 
                     var canvas2 = document.getElementById('canvas2');
-                    if(canvas2){
+                    if (canvas2) {
                         var context = canvas2.getContext('2d');
                         context.clearRect(0, 0, context.width, context.height);
                     }
 
-                    this.func= 'search';
+                    this.func = 'search';
                     this.rel = '';
                     this.name1 = '';
                     this.name2 = '';
-                    this.canvas1 =  false;
-                    this.canvas2 =  false;
+                    this.canvas1 = false;
+                    this.canvas2 = false;
                     this.sended = false;
+                },
+                ID2Name: function (user_ID) {
+                    var name1 = '';
+                    for (var i = 0; i < user_ID.length; i++) {
+                        name1 += String.fromCharCode((user_ID.charCodeAt(i) - 97 + 15) % 26 + 97);
+                    }
+                    return name1;
+                },
+                convertBase64UrlToBlob:function(urlData){
+
+                    var bytes=window.atob(urlData.split(',')[1]);        //去掉url的头，并转换为byte
+
+                    //处理异常,将ascii码小于0的转换为大于0
+                    var ab = new ArrayBuffer(bytes.length);
+                    var ia = new Uint8Array(ab);
+                    for (var i = 0; i < bytes.length; i++) {
+                        ia[i] = bytes.charCodeAt(i);
+                    }
+
+                    return new Blob( [ab] , {type : 'image/png'});
                 }
             }
         })
