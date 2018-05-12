@@ -18,6 +18,7 @@
   "homepage": "https://github.com/XanderXu1998/BlockTrain-Loving-Token#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "request-promise": "^4.2.2"
   }
 }
