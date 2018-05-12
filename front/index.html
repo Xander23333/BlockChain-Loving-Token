@@ -13,6 +13,26 @@
     <!-- import iView -->
     <script src="//unpkg.com/iview/dist/iview.min.js"></script>
     <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="bg.js"></script>
+    <script>
+        window.onload = function(){
+            //配置
+            var config = {
+                vx: 4,//点x轴速度,正为右，负为左
+                vy:  4,//点y轴速度
+                height: 2,//点高宽，其实为正方形，所以不宜太大
+                width: 2,
+                count: 100,//点个数
+                color: "121, 162, 185",//点颜色
+                stroke: "21,139,184",//线条颜色
+                dist: 6000,//点吸附距离
+                e_dist: 20000,//鼠标吸附加速距离
+                max_conn: 10//点到点最大连接数
+            }
+            //调用
+            CanvasParticle(config);
+        }
+    </script>
     <style>
         #canvas {
             border: dashed 2px blue;
@@ -21,21 +41,39 @@
         #canvas2 {
             border: dashed 2px blue;
         }
+
+        header{
+            width: 100%;
+            height: 40px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            margin-bottom: 2rem;
+        }
+        header > p{
+            line-height: 40px;
+            font-weight: 500;
+            font-size: 20px;
+            box-shadow: 0 0 2px grey;
+            padding-left: 5px;
+            z-index: 100000;
+        }
     </style>
 </head>
 
 <body>
     <!-- <input id="upload" type="file" accept="image/*;" capture="camera"> -->
+    <header>
+        <p>Blockchain - Loving Token</p>
+    </header>
     <div id="app">
         <Row type="flex" justify="center" class="code-row-bg">
             <i-col span="8">
-                <canvas id="canvas" width="640" height="480"></canvas>
+                <canvas id="canvas" width="600" height="480"></canvas>
             </i-col>
             <i-col span="8">
                 <video id="video" width="640" height="480" autoplay></video>
             </i-col>
             <i-col span="8" v-if="func == 'insert'">
-                <canvas id="canvas2" width="640" height="480"></canvas>
+                <canvas id="canvas2" width="600" height="480"></canvas>
             </i-col>
         </Row>
 
@@ -69,6 +107,7 @@
                         });
                     }
                 });
+                this.$Loading.config({height:40});
             },
             data: {
                 visible: false,
@@ -78,7 +117,8 @@
                 name2:'',
                 canvas1: false,
                 canvas2: false,
-                sended:false
+                sended:false,
+                timeLine_result:{}
             },
             methods: {
                 snap: function () {
@@ -96,12 +136,20 @@
                             var canvas = document.getElementById('canvas');
                             let dataurl = canvas.toDataURL();
                             var data = dataurl.substring(22, dataurl.length);
-                            console.log(data);
+                            that.$Loading.start();
                             $.ajax({
                                 type: "POST",
                                 url: 'http://localhost:3000/search',
                                 data: {
                                     img1: data
+                                },
+                                success:function (result) {
+                                    that.$Loading.finish();
+                                    that.init();
+                                },
+                                error:function () {
+                                    that.$Loading.error();
+                                    that.init();
                                 }
                             });
                             return;
@@ -126,6 +174,7 @@
 
                             var dataurl2 = _canvas2.toDataURL();
                             var data2 = dataurl2.substring(22, dataurl2.length);
+                            that.$Loading.start();
                             $.ajax({
                                 type: "POST",
                                 url: 'http://localhost:3000/insert',
@@ -134,12 +183,37 @@
                                     img2: data2,
                                     name1: that.name1,
                                     name2: that.name2,
-                                    rel: that.rel
+                                    rel: that.rel,
+                                    success:function (result) {
+                                        that.$Loading.finish();
+                                    },
+                                    error:function () {
+                                        that.$Loading.error();
+
+                                    }
                                 }
                             }, 1000);
-
                         }
                     }
+                },
+                init:function () {
+                    var canvas = document.getElementById('canvas');
+                    var context = canvas.getContext('2d');
+                    context.clearRect(0, 0, context.width, context.height);
+
+                    var canvas2 = document.getElementById('canvas2');
+                    if(canvas2){
+                        var context = canvas2.getContext('2d');
+                        context.clearRect(0, 0, context.width, context.height);
+                    }
+
+                    this.func= 'search';
+                    this.rel = '';
+                    this.name1 = '';
+                    this.name2 = '';
+                    this.canvas1 =  false;
+                    this.canvas2 =  false;
+                    this.sended = false;
                 }
             }
         })
