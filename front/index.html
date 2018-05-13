@@ -259,23 +259,22 @@
                                                     name1: that.name1,
                                                     name2: that.name2,
                                                     rel: that.rel,
-                                                },
-                                                success: function (result) {
-                                                    result = JSON.parse(result);
-                                                    console.log(result);
-                                                    if(result.success){
-                                                        that.$Loading.finish();
-                                                        that.good = '成功添加';
-                                                        setTimeout(function () {
-                                                            that.good = '';
-                                                        }, 1000);
-                                                    }
-                                                    else{
-                                                        that.$Loading.error();
-                                                        that.error = '添加失败';
-                                                        setTimeout(function () {
-                                                            that.error = '';
-                                                        }, 1000);
+                                                    success: function (result) {
+                                                        result = JSON.parse(result);
+                                                        if(result.success){
+                                                            that.$Loading.finish();
+                                                            that.good = '成功添加';
+                                                            setTimeout(function () {
+                                                                that.good = '';
+                                                            }, 1000);
+                                                        }
+                                                        else{
+                                                            that.$Loading.error();
+                                                            that.error = '添加失败';
+                                                            setTimeout(function () {
+                                                                that.error = '';
+                                                            }, 1000);
+                                                        }
                                                     }
                                                 }
                                             });
