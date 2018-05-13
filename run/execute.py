@@ -52,8 +52,8 @@ def search_relationship(user_id):
 
     when =  transactions["timestamp"]
     # "2018-05-12T15:37:14.000Z"
-    when = ( datetime.strptime(when,"%Y-%m-%dT%H:%M:%S.000Z") + timedelta(hours = 8) ).strftime("%Y.%m.%d") 
-    # "2018.5.12"
+    when = ( datetime.strptime(when,"%Y-%m-%dT%H:%M:%S.000Z") + timedelta(hours = 8) ).strftime("%Y.%m.%d %H:%M") 
+    # "2018.5.12 15:37"
     try:
       who1,who2,why = transactions["args"][1].split('&#@') 
     except IndexError:
@@ -68,6 +68,6 @@ def search_relationship(user_id):
 
     d.append( {"id":block["id"],"when":when,"who":who,"why":why,"type":branch} )
 
-  d = sorted(d,key = lambda x:x["id"])
+  d = sorted(d,key = lambda x:x["id"],reverse = True)
   answer = {"datas":d}
   print(json.dumps(answer, ensure_ascii=False ,indent=2))
