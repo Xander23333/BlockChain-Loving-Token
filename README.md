@@ -1,7 +1,7 @@
 # BlockTrain-Loving-Token
 PKU Hackathon 2018
 
-by **Depressed Pepe**（team #17 ）
+by **Depressed Pepe**（Team 17 ）
 
 # Descripe
 Interpersonal relationship records based on blockchain and face recognition.
