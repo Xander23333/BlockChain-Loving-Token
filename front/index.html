@@ -63,6 +63,7 @@
         }
         .desription{
             font-weight: 500;
+            font-size: 18px;
         }
         .time{
             color: #333333;
@@ -98,13 +99,15 @@
                 <i-input v-model="rel" placeholder="输入关系.." style="width: 300px" v-if="func == 'insert'"></i-input>
                 <i-input v-model="name1" placeholder="name1" style="width: 300px" v-if="func == 'insert'"></i-input>
                 <i-input v-model="name2" placeholder="name2" style="width: 300px" v-if="func == 'insert'"></i-input>
+                <Alert type="error" show-icon v-if="error != ''">{{error}}</Alert>
+                <Alert type="success" show-icon v-if="good != ''">{{good}}</Alert>
             </i-col>
         </Row>
 
         <Row type="flex" justify="center" class="code-row-bg">
             <i-col span="4">
-                <time-line v-for="item in timeLine_result" :key="item.who" style="margin-top: 20px;">
-                    <timeline-item>
+                <time-line style="margin-top: 20px;">
+                    <timeline-item v-for="item in timeLine_result" :key="item.who">
                         <p class="title">{{item.who}}</p>
                         <p class="desription">{{item.why}}</p>
                         <p class="time">{{item.when}}</p>
@@ -141,7 +144,9 @@
                 canvas1: false,
                 canvas2: false,
                 sended:false,
-                timeLine_result:[]
+                timeLine_result:[],
+                error:'',
+                good:''
             },
             methods: {
                 snap: function () {
@@ -173,7 +178,7 @@
                                     console.log(imgurl);
                                     $.ajax({
                                         type: "POST",
-                                        url: 'http://localhost:3000/search',
+                                        url: 'http://139.198.12.51:3000/search',
                                         data: {
                                             img1: imgurl.data.url
                                         },
@@ -182,12 +187,15 @@
                                             that.init();
                                             result = JSON.parse(result);
                                             console.log(result);
-                                            for (var item in result.haved) {
-                                                console.log(item.who);
-                                                item.why = that.ID2Name(item.why);
-                                                item.who = that.ID2Name(item.who);
-                                                that.push(item);
+                                            for(var i = 0; i < result.datas.length; i++){//decode
+                                                result.datas[i].who = that.ID2Name(result.datas[i].who);
+                                                result.datas[i].why = that.ID2Name(result.datas[i].why);
+                                                that.timeLine_result.push(result.datas[i])
                                             }
+                                            that.good = '检索成功';
+                                            setTimeout(function () {
+                                                that.good = '';
+                                            },1000);
                                         },
                                         // error:function () {
                                         //     that.$Loading.error();
@@ -244,7 +252,7 @@
                                         success:function (url2) {
                                             $.ajax({
                                                 type: "POST",
-                                                url: 'http://localhost:3000/insert',
+                                                url: 'http://139.198.12.51:3000/insert',
                                                 data: {
                                                     img1: url1.data.url,
                                                     img2: url2.data.url,
@@ -252,8 +260,21 @@
                                                     name2: that.name2,
                                                     rel: that.rel,
                                                     success: function (result) {
-                                                        that.$Loading.finish();
-                                                        console.log(result);
+                                                        result = JSON.parse(result);
+                                                        if(result.success){
+                                                            that.$Loading.finish();
+                                                            that.good = '成功添加';
+                                                            setTimeout(function () {
+                                                                that.good = '';
+                                                            }, 1000);
+                                                        }
+                                                        else{
+                                                            that.$Loading.error();
+                                                            that.error = '添加失败';
+                                                            setTimeout(function () {
+                                                                that.error = '';
+                                                            }, 1000);
+                                                        }
                                                     }
                                                 }
                                             });
