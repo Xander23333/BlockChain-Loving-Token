@@ -32,3 +32,4 @@ elif(args_h[1]=="blk"):
     ex.cl.blocks()
 else:
     print("wrong command type")
+
