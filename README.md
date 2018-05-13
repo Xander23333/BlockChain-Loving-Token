@@ -1,4 +1,4 @@
-# BlockTrain-Loving-Token
+# BlockChain-Loving-Token
 PKU Hackathon 2018
 
 by **Depressed Pepe**（Team 17 ）
